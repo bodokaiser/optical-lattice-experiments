@@ -13,16 +13,28 @@ import { GridMaterial } from 'babylonjs-materials'
 import { Color } from './theme'
 
 export class Setup {
-  protected _canvas: HTMLCanvasElement
-  protected _engine: Engine
-  protected _scene: Scene
-  protected _camera: FreeCamera
-  protected _light: Light
+  private _canvas : HTMLCanvasElement
+  private _engine : Engine
+  private _scene  : Scene
+  private _camera : FreeCamera
+  private _light  : Light
 
   constructor(element : HTMLCanvasElement) {
     this._canvas = element
     this._engine = new Engine(element, true)
     this._engine.setHardwareScalingLevel(0.5)
+  }
+
+  Scene() : Scene {
+    return this._scene
+  }
+
+  Light() : Light {
+    return this._light
+  }
+
+  Engine() : Engine {
+    return this._engine
   }
 
   setupScene() : Setup {
@@ -45,7 +57,7 @@ export class Setup {
     pbr.metallic = 1.0
     pbr.roughness = 1.0
 
-    let glass = new BABYLON.StandardMaterial("glass", this._scene);
+    let glass = new BABYLON.StandardMaterial("glass", this._scene)
     glass.diffuseColor = new Color3(0, 0, 0)
     glass.specularPower = 150
     glass.emissiveColor = new Color3(0.15, 0.15, 0.15)
