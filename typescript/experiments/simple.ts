@@ -10,7 +10,7 @@ import {
   SolidParticleSystem,
   SolidParticle,
 } from 'babylonjs'
-
+import colormap from 'colormap'
 import { Setup } from '../setup'
 import { Color } from '../theme'
 import { uniform } from '../random'
@@ -51,15 +51,21 @@ class SimpleSetup extends Setup {
     let plane2 = plane1.clone()
     plane2.position.x = -0.3
 
-    let gaussian = new GaussianBeam(1e-2, 1000e-9)
+    let gaussian = new GaussianBeam(2e-2, 1000e-9)
+    let colors = colormap({
+        colormap: 'viridis',
+        nshades: 255,
+        format: 'float',
+        alpha: 1
+    })
 
     let disc = MeshBuilder.CreateDisc('disc', { radius: 1e-3 }, scene)
 
     let sps = new SolidParticleSystem('sps', scene)
     sps.computeParticleRotation = false
-    //sps.computeParticleTexture = false
+    sps.computeParticleTexture = false
     sps.computeParticleVertex = false
-    sps.addShape(disc, 1000)
+    sps.addShape(disc, 10000)
     sps.updateParticle = particle => {
       particle.position.x = uniform(plane2.position.x, plane1.position.x)
       particle.position.y = uniform(0.03, 0.07)
@@ -69,13 +75,13 @@ class SimpleSetup extends Setup {
       let d = particle.position.x
       let I = gaussian.intensity(r, d)
 
-      //console.log(I)
+      let color = colors[Math.floor(255*I)]
+      color[3] = I
 
-      particle.color = new Color4(I, I, 1, 0)
-      //particle.color = Color3.FromHexString(Color.Primary).toColor4()
-      //particle.color.a = gaussian.intensity(r, d)
+      particle.color = Color4.FromArray(color)
     }
     sps.buildMesh()
+    sps.mesh.hasVertexAlpha = true
     sps.setParticles()
 
     disc.dispose()

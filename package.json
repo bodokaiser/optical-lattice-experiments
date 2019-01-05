@@ -12,6 +12,7 @@
     "@types/parcel-env": "0.0.0",
     "babylonjs": "^3.3.0",
     "babylonjs-materials": "^3.3.0",
+    "colormap": "^2.3.0",
     "parcel-bundler": "^1.11.0",
     "typescript": "^3.2.2"
   }
