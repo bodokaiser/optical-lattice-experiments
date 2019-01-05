@@ -3,12 +3,11 @@ import {
   Scene,
   Light,
   Color3,
-  Color4,
   HemisphericLight,
   Vector3,
   FreeCamera,
   MeshBuilder,
-  DefaultRenderingPipeline
+  PBRMetallicRoughnessMaterial
 } from 'babylonjs'
 import {
   GridMaterial
@@ -25,13 +24,13 @@ class Game {
   private _scene: Scene
   private _camera: FreeCamera
   private _light: Light
-  private _pipeline: DefaultRenderingPipeline
   private _options: GameOptions
 
   constructor(element : HTMLCanvasElement, options : GameOptions) {
     this._canvas = element
     this._options = options
     this._engine = new Engine(element, true)
+    this._engine.setHardwareScalingLevel(0.5)
   }
 
   setupScene() : Game {
@@ -40,20 +39,19 @@ class Game {
       .FromHexString(this._options.background)
       .toColor4()
 
-    this._camera = new FreeCamera('camera1',
+    this._camera = new FreeCamera('camera',
       new Vector3(0, 0.5, -1), this._scene)
     this._camera.minZ = .1
-    this._camera.speed = 1
+    this._camera.speed = 0.1
     this._camera.setTarget(Vector3.Zero())
     this._camera.attachControl(this._canvas, false)
 
-    this._light = new HemisphericLight('light1',
+    this._light = new HemisphericLight('light',
       new Vector3(0, 1, 0), this._scene)
 
-    this._pipeline = new DefaultRenderingPipeline('default',
-      true, this._scene, [this._camera])
-    this._pipeline.samples = 4
-    this._pipeline.sharpenEnabled = true
+    let pbr = new PBRMetallicRoughnessMaterial('pbr', this._scene)
+    pbr.metallic = 1.0
+    pbr.roughness = 1.0
 
     let grid = new GridMaterial('grid', this._scene)
     grid.gridRatio = 0.1
@@ -63,6 +61,13 @@ class Game {
     let ground = MeshBuilder.CreateGround('ground',
       { width: 1, height: 1 }, this._scene)
     ground.material = grid
+
+    let cylinder = MeshBuilder.CreateCylinder('cylinder',
+      { height: 0.1, diameter: 0.05 }, this._scene)
+    cylinder.material = pbr
+    cylinder.rotation.z = Math.PI / 2
+    cylinder.position.x = -0.45
+    cylinder.position.y = 0.05
 
     return this
   }
