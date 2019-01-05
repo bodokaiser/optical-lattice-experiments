@@ -1,14 +1,13 @@
 import {
+  ActionManager,
   Animation,
+  ExecuteCodeAction,
   Mesh,
   Color3,
   Color4,
-  Vector3,
-  VertexBuffer,
   MeshBuilder,
   PBRMetallicRoughnessMaterial,
   SolidParticleSystem,
-  SolidParticle,
 } from 'babylonjs'
 import colormap from 'colormap'
 import { Setup } from '../setup'
@@ -40,16 +39,18 @@ class SimpleSetup extends Setup {
     cylinder.rotation.z = Math.PI / 2
     cylinder.position.x = -0.45
     cylinder.position.y = 0.05
+    cylinder.isVisible = false
 
     let plane1 = MeshBuilder.CreatePlane('plane1',
       { width: 0.1, height: 0.1, sideOrientation: Mesh.DOUBLESIDE }, scene)
     plane1.material = glass
     plane1.rotation.y = Math.PI / 2
-    plane1.position.x = 0.5
+    plane1.position.x = -0.39
     plane1.position.y = 0.05
+    plane1.isVisible = false
 
     let plane2 = plane1.clone()
-    plane2.position.x = -0.3
+    plane2.position.x = 0.5
 
     let gaussian = new GaussianBeam(2e-2, 1000e-9)
     let colors = colormap({
@@ -59,7 +60,10 @@ class SimpleSetup extends Setup {
         alpha: 1
     })
 
-    let disc = MeshBuilder.CreateDisc('disc', { radius: 1e-3 }, scene)
+    let disc = MeshBuilder.CreateDisc('disc',
+      { radius: 1e-3 }, scene)
+
+    let state = 0
 
     let sps = new SolidParticleSystem('sps', scene)
     sps.computeParticleRotation = false
@@ -75,6 +79,8 @@ class SimpleSetup extends Setup {
       let d = particle.position.x
       let I = gaussian.intensity(r, d)
 
+      if (plane2.isVisible) I *= Math.cos(50*Math.PI*d)**2
+
       let color = colors[Math.floor(255*I)]
       color[3] = I
 
@@ -82,22 +88,30 @@ class SimpleSetup extends Setup {
     }
     sps.buildMesh()
     sps.mesh.hasVertexAlpha = true
-    sps.setParticles()
 
     disc.dispose()
 
+    scene.actionManager = new ActionManager(scene)
+    scene.actionManager.registerAction(
+      new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, e => {
+        if (e.sourceEvent.type != 'keydown') return
+        if (e.sourceEvent.key != 'x') return
 
-    /*
-    let disc = MeshBuilder.CreateDisc('disc',
-      { radius: 0.02, sideOrientation: Mesh.DOUBLESIDE }, scene)
-    disc.rotation.y = Math.PI / 2
-    disc.position.x = -0.4
-    disc.position.y = 0.05
-    */
+        console.log('state', state++)
+      }))
 
     scene.registerBeforeRender(() => {
-      let dt = engine.getDeltaTime()
-      //disc.convertToFlatShadedMesh()
+      if (state > 1) sps.setParticles()
+
+      switch (state) {
+        case 1:
+          cylinder.isVisible = true
+          break
+        case 3:
+          plane1.isVisible = true
+          plane2.isVisible = true
+          break
+      }
     })
 
     return this
