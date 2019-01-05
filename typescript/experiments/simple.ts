@@ -8,6 +8,7 @@ import {
   MeshBuilder,
   PBRMetallicRoughnessMaterial,
   SolidParticleSystem,
+  StandardMaterial,
 } from 'babylonjs'
 import colormap from 'colormap'
 import { Setup } from '../setup'
@@ -42,7 +43,7 @@ class SimpleSetup extends Setup {
     cylinder.isVisible = false
 
     let plane1 = MeshBuilder.CreatePlane('plane1',
-      { width: 0.1, height: 0.1, sideOrientation: Mesh.DOUBLESIDE }, scene)
+      { size: 0.1, sideOrientation: Mesh.DOUBLESIDE }, scene)
     plane1.material = glass
     plane1.rotation.y = Math.PI / 2
     plane1.position.x = -0.39
@@ -60,10 +61,10 @@ class SimpleSetup extends Setup {
         alpha: 1
     })
 
+    let state = 3
+
     let disc = MeshBuilder.CreateDisc('disc',
       { radius: 1e-3 }, scene)
-
-    let state = 0
 
     let sps = new SolidParticleSystem('sps', scene)
     sps.computeParticleRotation = false
@@ -91,6 +92,18 @@ class SimpleSetup extends Setup {
 
     disc.dispose()
 
+    let standard = new StandardMaterial('standard', scene)
+    standard.diffuseColor = Color3.FromHexString(Color.Primary)
+
+    let ground1 = MeshBuilder.CreateGround('ground1',
+      { width: plane2.position.x - plane1.position.x,
+        height: 0.1, subdivisions: 100, updatable: true }, scene)
+    ground1.material = standard
+    ground1.material.wireframe = true
+    //ground1.rotation.x = Math.PI / 2
+    ground1.position.x = 0.055
+    ground1.position.y = 0.05
+
     scene.actionManager = new ActionManager(scene)
     scene.actionManager.registerAction(
       new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, e => {
@@ -110,6 +123,14 @@ class SimpleSetup extends Setup {
         case 3:
           plane1.isVisible = true
           plane2.isVisible = true
+          ground1.updateMeshPositions(positions => {
+            window.positions = positions
+            for (var i = 0; i < positions.length; i += 3) {
+              positions[i+1] = 0.1 * Math.cos(0.2*Math.PI*positions[i])
+    						//positions[i+1] += Math.cos(50*Math.PI*positions[i+1])
+    					}
+          }, false)
+          ground1.convertToFlatShadedMesh()
           break
       }
     })
