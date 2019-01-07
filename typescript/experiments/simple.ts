@@ -1,6 +1,5 @@
 import {
   ActionManager,
-  Animation,
   ExecuteCodeAction,
   Mesh,
   Color3,
@@ -9,6 +8,8 @@ import {
   PBRMetallicRoughnessMaterial,
   SolidParticleSystem,
   StandardMaterial,
+  VertexBuffer,
+  VertexData,
 } from 'babylonjs'
 import colormap from 'colormap'
 import { Setup } from '../setup'
@@ -97,12 +98,25 @@ class SimpleSetup extends Setup {
 
     let ground1 = MeshBuilder.CreateGround('ground1',
       { width: plane2.position.x - plane1.position.x,
-        height: 0.1, subdivisions: 100, updatable: true }, scene)
+        height: 0.1, subdivisions: 500 }, scene)
     ground1.material = standard
-    ground1.material.wireframe = true
-    //ground1.rotation.x = Math.PI / 2
     ground1.position.x = 0.055
     ground1.position.y = 0.05
+    ground1.isVisible = false
+
+    let positions1 = ground1.getVerticesData(VertexBuffer.PositionKind)
+    let indices1 = ground1.getIndices()
+
+    for (let i = 0; i < positions1.length; i +=3 ) {
+        positions1[i+1] = 0.01 * Math.cos(50*Math.PI*positions1[i])**2
+    }
+
+    ground1.updateVerticesData(VertexBuffer.PositionKind,
+      positions1, false, true)
+
+    let normals = []
+    VertexData.ComputeNormals(positions1, indices1, normals)
+    ground1.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals, false, false)
 
     scene.actionManager = new ActionManager(scene)
     scene.actionManager.registerAction(
@@ -123,14 +137,10 @@ class SimpleSetup extends Setup {
         case 3:
           plane1.isVisible = true
           plane2.isVisible = true
-          ground1.updateMeshPositions(positions => {
-            window.positions = positions
-            for (var i = 0; i < positions.length; i += 3) {
-              positions[i+1] = 0.1 * Math.cos(0.2*Math.PI*positions[i])
-    						//positions[i+1] += Math.cos(50*Math.PI*positions[i+1])
-    					}
-          }, false)
-          ground1.convertToFlatShadedMesh()
+          break
+        case 4:
+          sps.mesh.isVisible = false
+          ground1.isVisible = true
           break
       }
     })
