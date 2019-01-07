@@ -48,10 +48,10 @@ window.addEventListener('load', () => {
     .registerBuilder(new Lambda((scene: Scene) => {
       scene.clearColor = Color3.FromHexString(Color.Background).toColor4()
 
-      let laser = createLaser('laser', scene)
-      laser.position.x = -0.45
-      laser.position.y = 0.05
-      laser.isVisible = false
+      let laser1 = createLaser('laser1', scene)
+      laser1.position.x = -0.45
+      laser1.position.y = 0.05
+      laser1.isVisible = false
 
       let mirror1 = createMirror('mirror1', scene)
       mirror1.position.x = -0.39
@@ -88,6 +88,24 @@ window.addEventListener('load', () => {
       potential1.position.y = 0.05
       potential1.isVisible = false
 
+      let laser2 = laser1.clone('laser2')
+      laser2.rotation.y = Math.PI / 2
+      laser2.position.x = 0
+      laser2.position.z = 0.45
+
+      let mirror3 = mirror1.clone('mirror3')
+      mirror3.rotation.y = 0
+      mirror3.position.x = 0
+      mirror3.position.z = 0.39
+
+      let mirror4 = mirror3.clone('mirror4')
+      mirror4.position.z = -0.5
+
+      let potential2 = potential1.clone('potential2')
+      potential2.rotation.y = Math.PI / 2
+      potential2.position.x = 0
+      potential2.position.z = -0.055
+
       scene.actionManager = new ActionManager(scene)
       scene.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, e => {
@@ -98,11 +116,11 @@ window.addEventListener('load', () => {
         }))
 
       scene.registerBeforeRender(() => {
-        if (state > 1) photons.setParticles()
+        if (state > 1 && state < 4) photons.setParticles()
 
         switch (state) {
           case 1:
-            laser.isVisible = true
+            laser1.isVisible = true
             break
           case 3:
             mirror1.isVisible = true
@@ -111,6 +129,12 @@ window.addEventListener('load', () => {
           case 4:
             photons.mesh.isVisible = false
             potential1.isVisible = true
+            break
+          case 5:
+            laser2.isVisible = true
+            mirror3.isVisible = true
+            mirror4.isVisible = true
+            potential2.isVisible = true
             break
         }
       })
