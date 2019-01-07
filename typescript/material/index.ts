@@ -1,5 +1,5 @@
 import Grid from './grid'
-import Glass from './glass'
 import Metal from './metal'
+import Standard from './standard'
 
-export { Grid, Glass, Metal }
+export { Grid, Standard, Metal }

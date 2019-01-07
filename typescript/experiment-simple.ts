@@ -41,40 +41,23 @@ window.addEventListener('load', () => {
 
   new App(canvas)
     .registerBuilder(new Material.Grid('grid', Color.Background))
-    .registerBuilder(new Material.Glass('glass', Color.Glass))
     .registerBuilder(new Material.Metal('metal', Color.Metal))
+    .registerBuilder(new Material.Standard('glass', Color.Glass, 0.3))
+    .registerBuilder(new Material.Standard('standard', Color.Glass))
     .registerBuilder(new Geometry.Ground('grid', 'grid'))
     .registerBuilder(new Lambda((scene: Scene) => {
       scene.clearColor = Color3.FromHexString(Color.Background).toColor4()
 
-      let laser = MeshBuilder.CreateCylinder('laser',
-        { height: 0.1, diameter: 0.05 }, scene)
-      laser.material = scene.getMaterialByID('metal')
-      laser.rotation.z = Math.PI / 2
-      laser.position.x = -0.45
-      laser.position.y = 0.05
-      laser.isVisible = false
+      let laser = createLaser('laser', scene)
 
-      let mirror1 = MeshBuilder.CreatePlane('mirror1',
-        { size: 0.1, sideOrientation: Mesh.DOUBLESIDE }, scene)
-      mirror1.material = scene.getMaterialByID('glass')
-      mirror1.rotation.y = Math.PI / 2
+      let mirror1 = createMirror('mirror1', scene)
       mirror1.position.x = -0.39
       mirror1.position.y = 0.05
-      mirror1.isVisible = false
-
       let mirror2 = mirror1.clone()
       mirror2.position.x = 0.5
 
-      let disc = MeshBuilder.CreateDisc('disc',
-        { radius: 1e-3 }, scene)
-
-      let sps = new SolidParticleSystem('sps', scene)
-      sps.computeParticleRotation = false
-      sps.computeParticleTexture = false
-      sps.computeParticleVertex = false
-      sps.addShape(disc, 10000)
-      sps.updateParticle = particle => {
+      let photons = createPhotons('photons', scene)
+      photons.updateParticle = particle => {
         particle.position.x = uniform(mirror2.position.x, mirror1.position.x)
         particle.position.y = uniform(0.03, 0.07)
         particle.position.z = uniform(-0.025, 0.025)
@@ -90,20 +73,15 @@ window.addEventListener('load', () => {
 
         particle.color = Color4.FromArray(color)
       }
-      sps.buildMesh()
-      sps.mesh.hasVertexAlpha = true
-
-      disc.dispose()
-
-      let standard = new StandardMaterial('standard', scene)
-      standard.diffuseColor = Color3.FromHexString(Color.Glass)
+      photons.buildMesh()
+      photons.mesh.hasVertexAlpha = true
 
       let ground1 = MeshBuilder.CreateGround('ground1',
         {
           width: mirror2.position.x - mirror1.position.x,
           height: 0.1, subdivisions: 500
         }, scene)
-      ground1.material = standard
+      ground1.material = scene.getMaterialByID('standard')
       ground1.position.x = 0.055
       ground1.position.y = 0.05
       ground1.isVisible = false
@@ -132,7 +110,7 @@ window.addEventListener('load', () => {
         }))
 
       scene.registerBeforeRender(() => {
-        if (state > 1) sps.setParticles()
+        if (state > 1) photons.setParticles()
 
         switch (state) {
           case 1:
@@ -143,7 +121,7 @@ window.addEventListener('load', () => {
             mirror2.isVisible = true
             break
           case 4:
-            sps.mesh.isVisible = false
+            photons.mesh.isVisible = false
             ground1.isVisible = true
             break
         }
@@ -155,3 +133,39 @@ window.addEventListener('load', () => {
 })
 
 if (module.hot) module.hot.accept(() => location.reload())
+
+function createLaser(name: string, scene: Scene) {
+  let laser = MeshBuilder.CreateCylinder(name,
+    { height: 0.1, diameter: 0.05 }, scene)
+  laser.material = scene.getMaterialByID('metal')
+  laser.rotation.z = Math.PI / 2
+  laser.position.x = -0.45
+  laser.position.y = 0.05
+  laser.isVisible = false
+
+  return laser
+}
+
+function createMirror(name: string, scene: Scene) {
+  let mirror = MeshBuilder.CreatePlane(name,
+    { size: 0.1, sideOrientation: Mesh.DOUBLESIDE }, scene)
+  mirror.material = scene.getMaterialByID('glass')
+  mirror.rotation.y = Math.PI / 2
+  mirror.isVisible = false
+
+  return mirror
+}
+
+function createPhotons(name: string, scene: Scene) {
+  let disc = MeshBuilder.CreateDisc('disc', { radius: 1e-3 }, scene)
+
+  let photons = new SolidParticleSystem('photons', scene)
+  photons.computeParticleRotation = false
+  photons.computeParticleTexture = false
+  photons.computeParticleVertex = false
+  photons.addShape(disc, 10000)
+
+  disc.dispose()
+
+  return photons
+}
