@@ -1,13 +1,16 @@
 import {
   ActionManager,
   ExecuteCodeAction,
+  FreeCamera,
   Mesh,
   Scene,
   Color3,
   Color4,
+  HemisphericLight,
   MeshBuilder,
   SolidParticle,
   SolidParticleSystem,
+  Vector3,
   VertexBuffer,
   VertexData,
 } from 'babylonjs'
@@ -47,6 +50,14 @@ window.addEventListener('load', () => {
     .registerBuilder(new Geometry.Ground('grid', 'grid'))
     .registerBuilder(new Lambda((scene: Scene) => {
       scene.clearColor = Color3.FromHexString(Color.Background).toColor4()
+
+      let light = new HemisphericLight('light', new Vector3(0, 1, 0), scene)
+
+      let camera = new FreeCamera('camera', new Vector3(0, 0.5, -1), scene)
+      camera.minZ = .1
+      camera.speed = 0.1
+      camera.setTarget(Vector3.Zero())
+      camera.attachControl(canvas, false)
 
       let laser1 = createLaser('laser1', scene)
       laser1.position.x = -0.45

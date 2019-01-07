@@ -38,14 +38,6 @@ export class App {
     let canvas = this.canvas
     let scene = this.scene = new Scene(this.engine)
 
-    let camera = new FreeCamera('camera', new Vector3(0, 0.5, -1), scene)
-    camera.minZ = .1
-    camera.speed = 0.1
-    camera.setTarget(Vector3.Zero())
-    camera.attachControl(canvas, false)
-
-    new HemisphericLight('light', new Vector3(0, 1, 0), scene)
-
     this.bootstraps.forEach(bootstrap => bootstrap.build(scene))
 
     return this
