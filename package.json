@@ -1,10 +1,10 @@
 {
-  "name": "optical-lattice-experiments",
+  "name": "physics-experiments",
   "author": "Bodo Kaiser",
   "version": "1.0.0",
   "license": "ISC",
-  "repository": "bodokaiser/optical-lattice-experiments",
-  "description": "WebGL experiments for optical lattices",
+  "repository": "bodokaiser/physics-experiments",
+  "description": "Physics WebGL experiments",
   "scripts": {
     "serve": "parcel index.html"
   },
