@@ -38,6 +38,7 @@ window.addEventListener('load', () => {
     .registerBuilder(new Geometry.Ground('grid', 'grid'))
     .registerBuilder(new Lambda((scene: Scene) => {
       scene.clearColor = Color3.FromHexString(Color.Background).toColor4()
+      scene.shadowsEnabled = true
 
       let light = new DirectionalLight('light', new Vector3(-1, -2, 1), scene)
       light.intensity = 0.9
@@ -61,7 +62,8 @@ window.addEventListener('load', () => {
       shadow.bias = 0.001
       shadow.normalBias = 0.005
 
-      scene.shadowsEnabled = true
+      let atoms = createAtoms('sphere', scene)
+
       scene.actionManager = new ActionManager(scene)
       scene.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, e => {
@@ -85,9 +87,34 @@ window.addEventListener('load', () => {
 
 if (module.hot) module.hot.accept(() => location.reload())
 
+function createAtoms(name: string, scene: Scene) {
+  let material = scene.getMaterialByName('metal') as StandardMaterial
+  material.diffuseColor = new Color3(0.3, 0.3, 0.3)
+  material.specularColor = new Color3(0.05, 0.05, 0.05)
+
+  let sphere = MeshBuilder.CreateSphere(`${name}00`,
+    { diameter: 0.03 }, scene)
+
+  let spheres = [sphere]
+
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      let s = sphere.clone(`${name}${i}${j}`)
+      s.position.x = 0.1 * i - 0.2
+      s.position.y = 0.2
+      s.position.z = 0.1 * j - 0.2
+
+      spheres.push(s)
+    }
+  }
+
+  return spheres
+}
+
+
 function createPotential(name: string, scene: Scene) {
   let material = scene.getMaterialByName('standard') as StandardMaterial
-  material.diffuseColor = new Color3(0.5, 0.5, 0.5)
+  material.diffuseColor = Color3.FromHexString(Color.Glass)
   material.specularColor = new Color3(0.05, 0.05, 0.05)
 
   let ground = MeshBuilder.CreateGround(name,
