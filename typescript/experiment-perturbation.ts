@@ -41,12 +41,12 @@ window.addEventListener('load', () => {
 
       let light = new DirectionalLight('light', new Vector3(-1, -2, 1), scene)
       light.intensity = 0.9
-      light.position = new Vector3(10, 50, -10)
+      light.position = new Vector3(1, 5, -1)
       light.shadowMinZ = 0
-      light.shadowMaxZ = 80
+      light.shadowMaxZ = 10
 
       let camera = new ArcRotateCamera('camera',
-        0, 0, 1, new Vector3(0, 0, 0), scene)
+        -Math.PI / 2, Math.PI / 2, 1, Vector3.Zero(), scene)
       camera.setPosition(new Vector3(1, 1, 1))
       camera.attachControl(canvas, true)
 
@@ -56,7 +56,10 @@ window.addEventListener('load', () => {
 
       let shadow = new ShadowGenerator(1024, light)
       shadow.getShadowMap().renderList.push(potential)
-      shadow.useBlurCloseExponentialShadowMap = true
+      shadow.useContactHardeningShadow = true
+      shadow.filteringQuality = ShadowGenerator.QUALITY_HIGH
+      shadow.bias = 0.001
+      shadow.normalBias = 0.005
 
       scene.shadowsEnabled = true
       scene.actionManager = new ActionManager(scene)
@@ -88,7 +91,7 @@ function createPotential(name: string, scene: Scene) {
   material.specularColor = new Color3(0.05, 0.05, 0.05)
 
   let ground = MeshBuilder.CreateGround(name,
-    { width: 0.6, height: 0.6, subdivisions: 500 }, scene)
+    { width: 0.6, height: 0.6, subdivisions: 500, updatable: true }, scene)
   ground.material = material
 
   let positions = ground.getVerticesData(VertexBuffer.PositionKind)
@@ -96,7 +99,7 @@ function createPotential(name: string, scene: Scene) {
   let normals = []
 
   for (let i = 0; i < positions.length; i += 3) {
-    let ux = Math.sin(10 * Math.PI * positions[i]) ** 2
+    let ux = Math.cos(10 * Math.PI * positions[i]) ** 2
     let uz = Math.cos(10 * Math.PI * positions[i + 2]) ** 2
 
     positions[i + 1] = 0.1 * ux * uz
