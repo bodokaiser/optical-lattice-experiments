@@ -16,11 +16,14 @@ install the dependencies
 npm install
 ```
 
-and run the development server:
+and run the development server
 
 ```shell
 npm run serve
 ```
+
+where you can now conduct the experiments by pressing the `x` key multiple
+times.
 
 [1]: https://www.typescriptlang.org
 [2]: https://www.babylonjs.com

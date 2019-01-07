@@ -6,7 +6,8 @@
   "repository": "bodokaiser/physics-experiments",
   "description": "Physics WebGL experiments",
   "scripts": {
-    "serve": "parcel index.html"
+    "serve": "parcel experiment-lattice.html",
+    "build": "parcel build experiment-lattice.html"
   },
   "dependencies": {
     "@types/parcel-env": "0.0.0",
