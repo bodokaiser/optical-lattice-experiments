@@ -7,7 +7,7 @@
   "description": "Physics WebGL experiments",
   "scripts": {
     "serve": "parcel *.html",
-    "build": "parcel *.html"
+    "build": "parcel build *.html"
   },
   "dependencies": {
     "@types/parcel-env": "0.0.0",
