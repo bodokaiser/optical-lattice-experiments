@@ -63,13 +63,13 @@ window.addEventListener('load', () => {
       camera.attachControl(canvas, true)
 
       let potential = createPotential('potential', scene)
-      potential.position.y = 0.05
+      potential.position.y = 0.15
       potential.receiveShadows = true
 
       updatePotential('potential', scene, (position: Vector3): Vector3 => {
-        position.y = 0.1
-        position.y *= Math.cos(10 * Math.PI * position.x) ** 2
-        position.y *= Math.cos(10 * Math.PI * position.z) ** 2
+        position.y = -0.1
+        position.y *= Math.sin(10 * Math.PI * position.x) ** 2
+        position.y *= Math.sin(10 * Math.PI * position.z) ** 2
 
         return position
       })
@@ -116,7 +116,7 @@ window.addEventListener('load', () => {
             state++
 
             updatePotential('potential', scene, (position: Vector3) => {
-              if (isBarrier(position)) position.y = 0.18
+              if (isBarrier(position)) position.y = 0.15
 
               return position
             })
@@ -137,7 +137,7 @@ window.addEventListener('load', () => {
               atom.isVisible = false
             })
             updatePotential('potential', scene, (position: Vector3): Vector3 => {
-              position.y = 0.1
+              position.y = -0.1
               position.y *= Math.cos(10 * Math.PI * position.x) ** 2
               position.y *= Math.cos(10 * Math.PI * position.z) ** 2
 
@@ -164,7 +164,7 @@ window.addEventListener('load', () => {
 
             perturbation.isVisible = false
             updatePotential('potential', scene, (position: Vector3) => {
-              if (isBarrier(position)) position.y = 0.18
+              if (isBarrier(position)) position.y = 0.15
 
               return position
             })
