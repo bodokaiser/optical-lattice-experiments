@@ -29,7 +29,7 @@ import { uniform } from './numeric'
 import { GaussianBeam } from './physic/optic'
 
 let time = 0
-let state = 6
+let state = 0
 
 let gaussian = new GaussianBeam(150e-4, 30e-4)
 
@@ -154,6 +154,7 @@ window.addEventListener('load', () => {
         switch (state) {
           case 0:
             grid.isVisible = true
+            atoms.isVisible = false
             beam1a.isVisible = false
             beam1b.isVisible = false
             beam2b.isVisible = false
@@ -164,6 +165,9 @@ window.addEventListener('load', () => {
             mirror2a.isVisible = false
             mirror2b.isVisible = false
             potential.isVisible = false
+            box.isVisible = false
+            barrier.isVisible = false
+            perturbation.isVisible = false
             break
           case 1:
             mirror1a.isVisible = false
