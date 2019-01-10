@@ -59,23 +59,19 @@ window.addEventListener('load', () => {
       let laser1 = createLaser('laser1', scene)
       laser1.position.x = -0.6
       laser1.position.y = 0.1
-      laser1.isVisible = false
 
       let beam1a = createBeam('beam1a', scene, false)
       beam1a.rotation.y = Math.PI / 2
       beam1a.position.y = 0.1
-      beam1a.isVisible = false
 
       let beam1b = createBeam('beam1b', scene, true)
       beam1b.rotation.y = Math.PI / 2
       beam1b.position.y = 0.1
-      beam1b.isVisible = false
 
       let mirror1a = createMirror('mirror1a', scene)
       mirror1a.position.x = 0.5
       mirror1a.material = laser1.material
       mirror1a.position.y = 0.1
-      mirror1a.isVisible = false
 
       let mirror1b = mirror1a.clone('mirror1b')
       mirror1b.material = scene.getMaterialByName('glass')
@@ -85,7 +81,6 @@ window.addEventListener('load', () => {
       laser2.rotation.y = Math.PI / 2
       laser2.position.x = 0
       laser2.position.z = -0.6
-      laser2.isVisible = false
 
       let beam2b = beam1b.clone('beam2b')
       beam2b.rotation.y = 0
@@ -117,26 +112,61 @@ window.addEventListener('load', () => {
 
       scene.registerBeforeRender(() => {
         switch (state) {
+          case 0:
+            beam1a.isVisible = false
+            beam1b.isVisible = false
+            beam2b.isVisible = false
+            laser1.isVisible = false
+            laser2.isVisible = false
+            mirror1a.isVisible = false
+            mirror1b.isVisible = false
+            mirror2a.isVisible = false
+            mirror2b.isVisible = false
+            break
           case 1:
+            mirror1a.isVisible = false
             laser1.isVisible = true
             break
           case 2:
+            beam1a.isVisible = false
             mirror1a.isVisible = true
             break
           case 3:
             beam1a.isVisible = true
+            mirror1a.material = scene.getMaterialByName('metal')
+            mirror1b.isVisible = false
+            beam1a.isVisible = true
+            beam1b.isVisible = false
             break
           case 4:
-            mirror1a.material = scene.getMaterialByName('glass')
-            mirror1b.isVisible = true
             beam1a.isVisible = false
             beam1b.isVisible = true
+            beam2b.isVisible = false
+            laser2.isVisible = false
+            mirror1a.material = scene.getMaterialByName('glass')
+            mirror1b.isVisible = true
+            mirror2a.isVisible = false
+            mirror2b.isVisible = false
             break
           case 5:
+            beam1b.isVisible = true
+            beam2b.isVisible = true
+            laser1.isVisible = true
             laser2.isVisible = true
+            mirror1a.isVisible = true
+            mirror1b.isVisible = true
             mirror2a.isVisible = true
             mirror2b.isVisible = true
-            beam2b.isVisible = true
+            break
+          case 6:
+            beam1b.isVisible = false
+            beam2b.isVisible = false
+            laser1.isVisible = false
+            laser2.isVisible = false
+            mirror1a.isVisible = false
+            mirror1b.isVisible = false
+            mirror2a.isVisible = false
+            mirror2b.isVisible = false
             break
         }
       })
