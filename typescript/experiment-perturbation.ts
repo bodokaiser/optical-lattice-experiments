@@ -27,7 +27,7 @@ import * as Material from './material'
 import * as Geometry from './geometry'
 import { between } from './numeric'
 
-let state = 0
+let state = -1
 
 
 // barrier segments are (x,z) coordinates which sit in the barrier
@@ -63,6 +63,7 @@ window.addEventListener('load', () => {
       camera.attachControl(canvas, true)
 
       let potential = createPotential('potential', scene)
+      potential.isVisible = false
       potential.position.y = 0.15
       potential.receiveShadows = true
 
@@ -104,6 +105,10 @@ window.addEventListener('load', () => {
 
       scene.registerBeforeRender(() => {
         switch (state) {
+          case 0:
+            potential.isVisible = true
+            break
+
           case 1:
             state++
 
@@ -138,8 +143,8 @@ window.addEventListener('load', () => {
             })
             updatePotential('potential', scene, (position: Vector3): Vector3 => {
               position.y = -0.1
-              position.y *= Math.cos(10 * Math.PI * position.x) ** 2
-              position.y *= Math.cos(10 * Math.PI * position.z) ** 2
+              position.y *= Math.sin(10 * Math.PI * position.x) ** 2
+              position.y *= Math.sin(10 * Math.PI * position.z) ** 2
 
               return position
             })
@@ -157,6 +162,10 @@ window.addEventListener('load', () => {
 
               index += 1
             }
+
+            break
+          case 11:
+            perturbation.isVisible = false
 
             break
           case 12:
