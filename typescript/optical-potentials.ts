@@ -355,7 +355,7 @@ function createPotential(name: string, scene: Scene) {
     let x = positions[i] - 0.5
     let z = positions[i + 2] - 0.5
 
-    positions[i + 1] += -0.1 * Math.cos(k * x) ** 2 * Math.cos(k * z) ** 2
+    positions[i + 1] += -0.05 * (Math.cos(k * x) ** 2 + Math.cos(k * z) ** 2)
   }
 
   VertexData.ComputeNormals(positions, indices, normals)
