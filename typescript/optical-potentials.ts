@@ -4,6 +4,7 @@ import {
   ArcRotateCamera,
   Color3,
   Color4,
+  CSG,
   DirectionalLight,
   ExecuteCodeAction,
   Mesh,
@@ -33,6 +34,25 @@ let state = 0
 
 let gaussian = new GaussianBeam(150e-4, 30e-4)
 
+window.addEventListener('message', e => {
+  let message = JSON.parse(e.data)
+
+  console.log(message)
+
+  if (message.namespace === 'reveal') {
+    switch (message.eventName) {
+      case 'fragmentshown':
+        state++
+        break
+      case 'fragmenthidden':
+        state--
+        break
+      case 'reset':
+        state = 0
+    }
+  }
+})
+
 window.addEventListener('load', () => {
   let canvas = document.getElementById('canvas') as HTMLCanvasElement
 
@@ -59,6 +79,9 @@ window.addEventListener('load', () => {
       camera.lowerRadiusLimit = 0.1
       camera.upperBetaLimit = 0.9 * Math.PI / 2
       camera.setPosition(new Vector3(1, 1, 1))
+      camera.inputs.clear()
+      camera.inputs.addMouseWheel()
+      camera.inputs.addPointers()
       camera.attachControl(canvas, true)
 
       let grid = scene.getMeshByName('grid')
@@ -75,14 +98,10 @@ window.addEventListener('load', () => {
       beam1b.rotation.y = Math.PI / 2
       beam1b.position.y = 0.1
 
-      let mirror1a = createMirror('mirror1a', scene)
-      mirror1a.position.x = 0.5
-      mirror1a.material = laser1.material
-      mirror1a.position.y = 0.1
-
-      let mirror1b = mirror1a.clone('mirror1b')
-      mirror1b.material = scene.getMaterialByName('glass')
-      mirror1b.position.x = -0.5
+      let mirror1 = createMirror('mirror1a', scene)
+      mirror1.position.x = 0.5
+      mirror1.material = laser1.material
+      mirror1.position.y = 0.1
 
       let laser2 = laser1.clone('laser2')
       laser2.rotation.y = Math.PI / 2
@@ -92,14 +111,11 @@ window.addEventListener('load', () => {
       let beam2b = beam1b.clone('beam2b')
       beam2b.rotation.y = 0
 
-      let mirror2a = mirror1b.clone('mirror2a')
-      mirror2a.material = scene.getMaterialByName('glass')
-      mirror2a.rotation.y = 0
-      mirror2a.position.x = 0
-      mirror2a.position.z = 0.5
-
-      let mirror2b = mirror2a.clone('mirror2b')
-      mirror2b.position.z = -0.5
+      let mirror2 = mirror1.clone('mirror2')
+      mirror2.material = scene.getMaterialByName('glass')
+      mirror2.rotation.y = 0
+      mirror2.position.x = 0
+      mirror2.position.z = 0.5
 
       let potential = createPotential('potential', scene)
 
@@ -108,6 +124,9 @@ window.addEventListener('load', () => {
       let box = createBoxPotential('box', scene)
       box.position.y = 0.05
       box.rotation.y = Math.PI / 2
+
+      let trap = createTrapPotential('trap', scene)
+      trap.position.y = 0.05
 
       let barrier = createBarrierPotential('barrier', scene)
       barrier.position.y = 0.05
@@ -137,11 +156,13 @@ window.addEventListener('load', () => {
         new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, e => {
           if (e.sourceEvent.type != 'keydown') return
 
-          switch (e.sourceEvent.key) {
-            case 'x':
+          switch (e.sourceEvent.keyCode) {
+            // page down, right, down
+            case 34: case 39: case 40:
               state++
               break
-            case 'y':
+            // page up, left, up
+            case 33: case 37: case 38:
               state--
           }
 
@@ -160,51 +181,41 @@ window.addEventListener('load', () => {
             beam2b.isVisible = false
             laser1.isVisible = false
             laser2.isVisible = false
-            mirror1a.isVisible = false
-            mirror1b.isVisible = false
-            mirror2a.isVisible = false
-            mirror2b.isVisible = false
+            mirror1.isVisible = false
+            mirror2.isVisible = false
             potential.isVisible = false
             box.isVisible = false
+            trap.isVisible = false
             barrier.isVisible = false
             perturbation.isVisible = false
             break
           case 1:
-            mirror1a.isVisible = false
             laser1.isVisible = true
+            mirror1.isVisible = true
             break
           case 2:
-            beam1a.isVisible = false
-            mirror1a.isVisible = true
-            break
-          case 3:
             beam1a.isVisible = true
-            mirror1a.material = scene.getMaterialByName('metal')
-            mirror1b.isVisible = false
+            mirror1.material = scene.getMaterialByName('metal')
             beam1a.isVisible = true
             beam1b.isVisible = false
             break
-          case 4:
+          case 3:
             beam1a.isVisible = false
             beam1b.isVisible = true
             beam2b.isVisible = false
             laser2.isVisible = false
-            mirror1a.material = scene.getMaterialByName('glass')
-            mirror1b.isVisible = true
-            mirror2a.isVisible = false
-            mirror2b.isVisible = false
+            mirror1.material = scene.getMaterialByName('glass')
+            mirror2.isVisible = false
             break
-          case 5:
+          case 4:
             beam1b.isVisible = true
             beam2b.isVisible = true
             laser1.isVisible = true
             laser2.isVisible = true
-            mirror1a.isVisible = true
-            mirror1b.isVisible = true
-            mirror2a.isVisible = true
-            mirror2b.isVisible = true
+            mirror1.isVisible = true
+            mirror2.isVisible = true
             break
-          case 6:
+          case 5:
             box.isVisible = false
             barrier.isVisible = false
             grid.isVisible = true
@@ -214,38 +225,48 @@ window.addEventListener('load', () => {
             beam2b.isVisible = false
             laser1.isVisible = false
             laser2.isVisible = false
-            mirror1a.isVisible = false
-            mirror1b.isVisible = false
-            mirror2a.isVisible = false
-            mirror2b.isVisible = false
+            mirror1.isVisible = false
+            mirror2.isVisible = false
             potential.isVisible = false
             perturbation.isVisible = false
             break
-          case 7:
+          case 6:
             grid.isVisible = false
             atoms.isVisible = false
             potential.isVisible = true
             break
-          case 8:
+          case 7:
             atoms.isVisible = true
             break
-          case 9:
+          case 8:
             box.isVisible = false
             atoms.isVisible = false
             break
+          case 9:
+            box.isVisible = true
+            break
           case 10:
             box.isVisible = true
+            box.position.z = 0.3 * Math.cos(0.001 * time)
+            trap.isVisible = false
+            barrier.isVisible = false
             break
           case 11:
-            box.isVisible = true
-            box.position.z = 0.3 * Math.cos(0.001 * time)
+            box.isVisible = false
+            trap.isVisible = true
             break
           case 12:
+            trap.scaling.x = Math.cos(0.001 * time) ** 2 + 0.5
+            trap.scaling.z = Math.cos(0.001 * time) ** 2 + 0.5
+            barrier.isVisible = false
+            break
+          case 13:
+            trap.isVisible = false
             box.isVisible = false
             barrier.isVisible = true
             perturbation.isVisible = false
             break
-          case 13:
+          case 14:
             barrier.isVisible = false
             perturbation.isVisible = true
             scene.beginAnimation(perturbation, 0, 100, true)
@@ -343,7 +364,7 @@ function createPotential(name: string, scene: Scene) {
   material.specularColor = new Color3(0.05, 0.05, 0.05)
 
   let ground = MeshBuilder.CreateGround(name,
-    { width: 0.9, height: 0.9, subdivisions: 500, updatable: true }, scene)
+    { width: 1.02, height: 1.02, subdivisions: 500, updatable: true }, scene)
   ground.material = material
 
   let positions = ground.getVerticesData(VertexBuffer.PositionKind)
@@ -373,6 +394,26 @@ function createBoxPotential(name: string, scene: Scene) {
   box.material = scene.getMaterialByName('standard')
 
   return box
+}
+
+
+function createTrapPotential(name: string, scene: Scene) {
+  let box1 = MeshBuilder.CreateBox(name,
+    { width: 0.5, height: 0.2, depth: 0.5 }, scene)
+  let box2 = MeshBuilder.CreateBox(name,
+    { width: 0.4, height: 0.2, depth: 0.4 }, scene)
+
+  let csg1 = CSG.FromMesh(box1)
+  let csg2 = CSG.FromMesh(box2)
+
+  let trap = csg1
+    .subtract(csg2)
+    .toMesh(name, scene.getMaterialByName('standard'), scene, true)
+
+  box1.dispose()
+  box2.dispose()
+
+  return trap
 }
 
 
