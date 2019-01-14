@@ -35,22 +35,15 @@ let state = 0
 let gaussian = new GaussianBeam(150e-4, 30e-4)
 
 window.addEventListener('message', e => {
-  let message = JSON.parse(e.data)
+  console.log(e.data)
 
-  console.log(message)
+  let message = { state }
 
-  if (message.namespace === 'reveal') {
-    switch (message.eventName) {
-      case 'fragmentshown':
-        state++
-        break
-      case 'fragmenthidden':
-        state--
-        break
-      case 'reset':
-        state = 0
-    }
-  }
+  try {
+    message = JSON.parse(e.data)
+  } catch (e) { }
+
+  if (message.state) state = message.state
 })
 
 window.addEventListener('load', () => {
